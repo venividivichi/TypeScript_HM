@@ -27,5 +27,5 @@ let сalcOperation: Calculator = {
   div: (a, b) => a / b
 };
 
-let result = calculate(сalcOperation, 'div', 8, 2);
+let result: number = calculate(сalcOperation, 'div', 8, 2);
 console.log(result);  
