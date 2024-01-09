@@ -1,224 +1,108 @@
-class School {
-  // implement 'add area', 'remove area', 'add lecturer', and 'remove lecturer' methods
-
-  _areas: Array<Area> = [];
-  _lecturers: Array<Lecturer> = []; // Name, surname, position, company, experience, courses, contacts
-
-  get areas() {
-    return this._areas;
-  }
-
-  get lecturers() {
-    return this._lecturers;
-  }
-
-  addArea(area: Area): void {
-    this._areas.push(area);
-  }
-
-  addLecture(lecture: Lecturer): void {
-    this._lecturers.push(lecture);
-  }
-
-  removeArea(area: Area): void {
-    const index = this._areas.findIndex((existArea) => existArea === area);
-    if (index !== -1) {
-      this._areas.splice(index, 1);
-    }
-  }
-
-  removeLecture(surname: string): void {
-    const index = this._lecturers.findIndex((lecturer) => lecturer.surname === surname);
-    if (index !== -1) {
-      this._lecturers.splice(index, 1);
-    }
-  }
-}
-
-class Lecturer {
-  constructor(
-    public name: string,
-    public surname: string,
-    public position: string,
-    public company: string,
-    public experience: number,
-    public courses: Array<string>,
-    public contacts: string
-  ) {}
-}
-
-class Area {
-  // implement getters for fields and 'add/remove level' methods
-  _levels: Array<Level> = [];
-  _name: string;
-
-  constructor(name: string) {
-    this._name = name;
-  }
-
-  get name(): string {
-    return this._name;
-  }
-
-  get levels(): Array<Level> {
-    return this._levels;
-  }
-
-  addLevel(level: Level): void {
-    this._levels.push(level);
-  }
-
-  removeLevel(level: Level): void {
-    const index = this._levels.findIndex((existLevel) => existLevel === level);
-    if (index !== -1) {
-      this._levels.splice(index, 1);
-    }
-  }
-}
-
-class Level {
-  // implement getters for fields and 'add/remove group' methods
-
-  _groups: Array<Group> = [];
-  _name: string;  
-  _description: string;
-
-  constructor(name: string, description: string) {
-    this._name = name;
-    this._description = description;
-  }
-
-  get name(): string {
-    return this._name;
-  }
-
-  get description(): string {
-    return this._description;
-  }
-
-  get groups(): Array<Group> {
-    return this._groups;
-  }
-
-  addGroup(group: Group): void {
-    this._groups.push(group);
-  }
-
-  removeGroup(group: Group): void {
-    const index = this._groups.findIndex((existGroup) => existGroup === group);
-    if (index !== -1) {
-      this._groups.splice(index, 1);
-    }
-  }
-}
-
-const enum GroupStatus {
-  Active = 'active',
-  Inactive = 'inactive',
-}
-
-class Group {
-
-  // implement getters for fields and 'add/remove student' and 'set status' methods
-
-  _area: string;
-  _status: GroupStatus;
-  _students: Array<Student> = []; // Modify the array so that it has a valid toSorted method*
-  _directionName: string;
-  _levelName: string;
-
-  constructor(area: string, directionName: string, levelName: string, status: GroupStatus) {
-    this._area = area;
-    this._directionName = directionName;
-    this._levelName = levelName;
-    this._status = status;
-  }
-
-  get area(): string {
-    return this._area;
-  }
-
-  get directionName(): string {
-    return this._directionName;
-  }
-
-  get levelName(): string {
-    return this._levelName;
-  }
+abstract class Shape {
   
-  get students(): Student[] {
-    return this._students;
+  private readonly color: string;
+  private readonly name: string;
+
+  constructor(color: string, name: string) {
+    this.color = color;
+    this.name = name;
   }
 
-  get status(): GroupStatus {
-    return this._status;
+  public display(): string {
+    return `${this.name}, ${this.color}`;
   }
 
-  setStatus(status: GroupStatus): void {
-    this._status = status;
-  }
-
-  addStudent(student: Student): void {
-    this._students.push(student);
-  }
-
-  removeStudent(student: Student): void {
-    const index = this._students.findIndex((existStudent) => existStudent === student);
-    if (index !== -1) {
-      this._students.splice(index, 1);
-    }
-  }
-
-  showPerformance() {
-    const sortedStudents = this._students.slice().sort((a, b) => b.getPerformanceRating() - a.getPerformanceRating());
-    return sortedStudents;
-  }
+  abstract calculateArea(): string
 
 }
 
-class Student {
-  // implement 'set grade' and 'set visit' methods
+class Circle extends Shape {
+  
+  private radius: number;
 
-  _firstName: string;
-  _lastName: string;
-  _birthYear: number;
-  _grades: {workName: string; mark: number}[] = []; // workName: mark
-  _visits: {lessonName: string; present: boolean}[] = [] // lesson: present
-
-  constructor(firstName: string, lastName: string, birthYear: number) {
-    this._firstName = firstName;
-    this._lastName = lastName;
-    this._birthYear = birthYear;
+  constructor(color: string, radius: number) {
+    super(color, 'Circle');
+    this.radius = radius;
   }
 
-  get fullName(): string {
-    return `${this._lastName} ${this._firstName}`;
-  }
-
-  set fullName(value: string) {
-    [this._lastName, this._firstName] = value.split(' ');
-  }
-
-  get age(): number {
-    return new Date().getFullYear() - this._birthYear;
-  }
-
-  setGrade(workName: string ,mark: number): void {
-    this._grades.push({workName, mark});
-  }
-
-  setVisit(lessonName: string, present: boolean): void {
-    this._visits.push({lessonName, present});
-  }
-
-  getPerformanceRating() {
-    const gradeValues = this._grades.map((grade) => grade.mark);
-
-    if (!gradeValues.length) return 0;
-
-    const averageGrade = gradeValues.reduce((sum, grade) => sum + grade, 0) / gradeValues.length;
-    const attendancePercentage = (this._visits.filter(present => present).length / this._visits.length) * 100;
-
-    return (averageGrade + attendancePercentage) / 2;
+  calculateArea(): string {
+    return (Math.PI * this.radius ** 2).toFixed(2);
   }
 }
+
+class Rectangle extends Shape {
+  
+  private width: number;
+  private height: number;
+
+  constructor(color: string, width: number, height: number) {
+    super(color, 'Rectangle');
+    this.width = width;
+    this.height = height;
+  }
+
+  calculateArea(): string {
+    return (this.width * this.height).toFixed(2);
+  }
+
+  print(): void {
+    console.log('Rectangle formula for calculating area: width * height');
+  }
+}
+
+class Square extends Shape {
+
+  private side: number;
+
+  constructor(color: string, side: number) {
+    super(color, 'Square');
+    this.side = side;
+  }
+
+  calculateArea(): string {
+    return (this.side * this.side).toFixed(2);
+  }
+
+  print(): void {
+    console.log('Square formula for calculating area: side * side');
+  }
+}
+
+class Triangle extends Shape {
+  
+  private base: number;
+  private height: number;
+
+  constructor(color: string, base: number, height: number) {
+    super(color, 'Triangle');
+    this.base = base;
+    this.height = height;
+  }
+
+  calculateArea(): string {
+    return (0.5 * this.base * this.height).toFixed(2);
+  }
+}
+
+let circle: Shape = new Circle('Red', 5);
+console.log(circle.display());
+console.log('Area: ' + circle.calculateArea());
+console.log('---------------------------');
+
+
+let rectangle = new Rectangle('Blue', 4, 6);
+console.log(rectangle.display());
+console.log('Area: ' + rectangle.calculateArea());
+rectangle.print();
+console.log('---------------------------');
+
+let square = new Square('Green', 4);
+console.log(square.display());
+console.log('Area: ' + square.calculateArea());
+square.print();
+console.log('---------------------------');
+
+let triangle: Shape = new Triangle('Gray', 4, 6);
+console.log(triangle.display());
+console.log('Area :' + triangle.calculateArea());
+console.log('---------------------------');
