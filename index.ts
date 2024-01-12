@@ -1,108 +1,100 @@
-abstract class Shape {
+
+// Визначте інтерфейс, який використовує сигнатуру індексу з типами об'єднання. 
+// Наприклад, тип значення для кожного ключа може бути число | рядок.
+
+interface IMySignIndex {
+  [key: string]: number | string;
+}
+
+const myObj: IMySignIndex = {
+  name: 'Nazarii',
+  age: 31,
+  city: 'Kyiv',
+};
+
+// Створіть інтерфейс, у якому типи значень у сигнатурі індексу є функціями. 
+// Ключами можуть бути рядки, а значеннями — функції, які приймають будь-які аргументи.
+
+interface IFunctionIndex {
+  [key: string]: (...args: any[]) => string | number;
+}
+
+const functionObj: IFunctionIndex = {
+  hi: (name: string) => `Hello, I'm ${name}!`,
+  sum: (x: number, y: number) => x + y,
+  mult: (x: number, y: number) => x * y,
+};
+
+// Опишіть інтерфейс, який використовує сигнатуру індексу для опису об'єкта, 
+//подібного до масиву. Ключі повинні бути числами, а значення - певного типу.
+
+interface IArrLikeObj {
+  [index: number]: string; // або тип, який ви хочете використовувати
+  length: number;
+}
+
+const arrLike: IArrLikeObj = {
+  0: 'first',
+  1: 'second',
+  2: 'third',
+  length: 3,
+};
+
+// Створіть інтерфейс з певними властивостями та індексною сигнатурою. Наприклад, ви можете мати 
+// властивості типу name: string та індексну сигнатуру для додаткових динамічних властивостей.
+
+interface ExampleInterface {
+  age: number;
+  [key: string]: string | number;
+}
+
+const exampleObject: ExampleInterface = {
+  name: 'Nazarii',
+  age: 31,
+  city: 'Kyiv',
+  count: 2
+};
+
+// Створіть два інтерфейси, один з індексною сигнатурою, а інший розширює перший, додаючи специфічні властивості.
+
+interface IIndexSignature {
+  [key: string]: number | string | boolean;
+}
+
+interface IExtendedInterface extends IIndexSignature {
+  specificProperty: number;
+  anotherSpecificProperty: string;
+  ['test']: number;
+}
+
+const Obj: IExtendedInterface = {
+  specificProperty: 27,
+  anotherSpecificProperty: 'Hello',
+  additionalProperty: true,
+  ['test']: 27
+};
+
+// Напишіть функцію, яка отримує об'єкт з індексною сигнатурою і перевіряє, 
+// чи відповідають значення певних ключів певним критеріям (наприклад, чи всі значення є числами).
+
+interface IIndexSignatureObj {
+  [key: string]: number | string,
+} 
+
+function checkValues(obj: IIndexSignatureObj): void {
   
-  private readonly color: string;
-  private readonly name: string;
-
-  constructor(color: string, name: string) {
-    this.color = color;
-    this.name = name;
+  for (let value of Object.values(obj)) {
+    if (typeof value !== 'number') {
+      return console.log('Не всі значення є числами.');
+    }
   }
-
-  public display(): string {
-    return `${this.name}, ${this.color}`;
-  }
-
-  abstract calculateArea(): string
-
+  return console.log('Всі значення є числами.');
 }
 
-class Circle extends Shape {
-  
-  private radius: number;
+const testObj: IIndexSignatureObj = {
+  key1: 42,
+  key2: 100,
+  key3: 'not a number',
+};
 
-  constructor(color: string, radius: number) {
-    super(color, 'Circle');
-    this.radius = radius;
-  }
-
-  calculateArea(): string {
-    return (Math.PI * this.radius ** 2).toFixed(2);
-  }
-}
-
-class Rectangle extends Shape {
-  
-  private width: number;
-  private height: number;
-
-  constructor(color: string, width: number, height: number) {
-    super(color, 'Rectangle');
-    this.width = width;
-    this.height = height;
-  }
-
-  calculateArea(): string {
-    return (this.width * this.height).toFixed(2);
-  }
-
-  print(): void {
-    console.log('Rectangle formula for calculating area: width * height');
-  }
-}
-
-class Square extends Shape {
-
-  private side: number;
-
-  constructor(color: string, side: number) {
-    super(color, 'Square');
-    this.side = side;
-  }
-
-  calculateArea(): string {
-    return (this.side * this.side).toFixed(2);
-  }
-
-  print(): void {
-    console.log('Square formula for calculating area: side * side');
-  }
-}
-
-class Triangle extends Shape {
-  
-  private base: number;
-  private height: number;
-
-  constructor(color: string, base: number, height: number) {
-    super(color, 'Triangle');
-    this.base = base;
-    this.height = height;
-  }
-
-  calculateArea(): string {
-    return (0.5 * this.base * this.height).toFixed(2);
-  }
-}
-
-let circle: Shape = new Circle('Red', 5);
-console.log(circle.display());
-console.log('Area: ' + circle.calculateArea());
-console.log('---------------------------');
-
-
-let rectangle = new Rectangle('Blue', 4, 6);
-console.log(rectangle.display());
-console.log('Area: ' + rectangle.calculateArea());
-rectangle.print();
-console.log('---------------------------');
-
-let square = new Square('Green', 4);
-console.log(square.display());
-console.log('Area: ' + square.calculateArea());
-square.print();
-console.log('---------------------------');
-
-let triangle: Shape = new Triangle('Gray', 4, 6);
-console.log(triangle.display());
-console.log('Area :' + triangle.calculateArea());
-console.log('---------------------------');
+let result = checkValues(testObj);
