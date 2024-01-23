@@ -41,6 +41,14 @@ let animal2: DeepRequireReadonly<IAnimalEntity2> = JSON.parse(json2);
 animal2.age = 12
 animal2.region = {}  
 
+const object1: DeepRequireReadonly<IAnimalEntity2> = {
+  name?: 'Nazar',
+  age: 12,
+  region: {
+    city: 'kyiv'
+  }
+};
+
 // Вам потрібно сворити тип UpperCaseKeys, який буде приводити всі ключи до верхнього регістру.
 
 type UpperCaseKeys<T> = {
@@ -53,9 +61,34 @@ interface Test {
 }
 
 const test: UpperCaseKeys<Test> = {
-  NAME: "Nazar",
+  name: "Nazar",
   age: 12
 };
 
+//І саме цікаве. Створіть тип ObjectToPropertyDescriptor, який перетворює звичайний обʼєкт на обʼєкт де кожне value є дескриптором.
+
+type ObjectToPropertyDescriptor<T> = {
+  [P in keyof T]: PropertyDescriptor;
+};
+
+const object = {
+  name: 'Nazar',
+  age: 12,
+};
+
+const test_obj: ObjectToPropertyDescriptor<typeof object> = { 
+  name: {
+    value: 'Nazar',
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  },
+  age: {
+    value: 12,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  }
+ }
 
 
