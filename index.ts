@@ -1,100 +1,61 @@
 
-// Визначте інтерфейс, який використовує сигнатуру індексу з типами об'єднання. 
-// Наприклад, тип значення для кожного ключа може бути число | рядок.
+//Вам потрібно створити тип DeepReadonly який буде робити доступними тільки для читання навіть властивості вкладених обʼєктів.
 
-interface IMySignIndex {
-  [key: string]: number | string;
-}
-
-const myObj: IMySignIndex = {
-  name: 'Nazarii',
-  age: 31,
-  city: 'Kyiv',
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: DeepReadonly<T[P]>;
 };
 
-// Створіть інтерфейс, у якому типи значень у сигнатурі індексу є функціями. 
-// Ключами можуть бути рядки, а значеннями — функції, які приймають будь-які аргументи.
-
-interface IFunctionIndex {
-  [key: string]: (...args: any[]) => string | number;
-}
-
-const functionObj: IFunctionIndex = {
-  hi: (name: string) => `Hello, I'm ${name}!`,
-  sum: (x: number, y: number) => x + y,
-  mult: (x: number, y: number) => x * y,
-};
-
-// Опишіть інтерфейс, який використовує сигнатуру індексу для опису об'єкта, 
-//подібного до масиву. Ключі повинні бути числами, а значення - певного типу.
-
-interface IArrLikeObj {
-  [index: number]: string; // або тип, який ви хочете використовувати
-  length: number;
-}
-
-const arrLike: IArrLikeObj = {
-  0: 'first',
-  1: 'second',
-  2: 'third',
-  length: 3,
-};
-
-// Створіть інтерфейс з певними властивостями та індексною сигнатурою. Наприклад, ви можете мати 
-// властивості типу name: string та індексну сигнатуру для додаткових динамічних властивостей.
-
-interface ExampleInterface {
+interface IAnimalEntity {
+  name: string;
   age: number;
-  [key: string]: string | number;
-}
-
-const exampleObject: ExampleInterface = {
-  name: 'Nazarii',
-  age: 31,
-  city: 'Kyiv',
-  count: 2
-};
-
-// Створіть два інтерфейси, один з індексною сигнатурою, а інший розширює перший, додаючи специфічні властивості.
-
-interface IIndexSignature {
-  [key: string]: number | string | boolean;
-}
-
-interface IExtendedInterface extends IIndexSignature {
-  specificProperty: number;
-  anotherSpecificProperty: string;
-  ['test']: number;
-}
-
-const Obj: IExtendedInterface = {
-  specificProperty: 27,
-  anotherSpecificProperty: 'Hello',
-  additionalProperty: true,
-  ['test']: 27
-};
-
-// Напишіть функцію, яка отримує об'єкт з індексною сигнатурою і перевіряє, 
-// чи відповідають значення певних ключів певним критеріям (наприклад, чи всі значення є числами).
-
-interface IIndexSignatureObj {
-  [key: string]: number | string,
-} 
-
-function checkValues(obj: IIndexSignatureObj): void {
-  
-  for (let value of Object.values(obj)) {
-    if (typeof value !== 'number') {
-      return console.log('Не всі значення є числами.');
-    }
+  bla: {
+    bla1: string
   }
-  return console.log('Всі значення є числами.');
 }
 
-const testObj: IIndexSignatureObj = {
-  key1: 42,
-  key2: 100,
-  key3: 'not a number',
+let json = '{"name": "animal", "age": 0}';
+
+let animal: DeepReadonly<IAnimalEntity> = JSON.parse(json);
+
+animal.age = 12 
+animal.bla.bla1 = 'name'
+
+//Вам потрібно створити тип DeepRequireReadonly який буде робити доступними тільки для читання навіть властивості вкладених обʼєктів та ще й робити їх обовʼязковими.
+
+type DeepRequireReadonly<T> = {
+  readonly [P in keyof T]-?: DeepRequireReadonly<T[P]>;
 };
 
-let result = checkValues(testObj);
+interface IAnimalEntity2 {
+  name: string;
+  age: number;
+  region: {
+    city: string
+  }
+}
+
+let json2 = '{"name": "animal", "age": 0, "region": {"city": "kyiv"}}';
+
+let animal2: DeepRequireReadonly<IAnimalEntity2> = JSON.parse(json2);
+
+animal2.age = 12
+animal2.region = {}  
+
+// Вам потрібно сворити тип UpperCaseKeys, який буде приводити всі ключи до верхнього регістру.
+
+type UpperCaseKeys<T> = {
+  [P in keyof T as Uppercase<string & P>]: T[P];
+};
+
+interface Test {
+  name: string;
+  age: number;
+}
+
+const test: UpperCaseKeys<Test> = {
+  NAME: "Nazar",
+  age: 12
+};
+
+
+
