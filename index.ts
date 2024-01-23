@@ -1,108 +1,61 @@
-abstract class Shape {
-  
-  private readonly color: string;
-  private readonly name: string;
 
-  constructor(color: string, name: string) {
-    this.color = color;
-    this.name = name;
-  }
+//Вам потрібно створити тип DeepReadonly який буде робити доступними тільки для читання навіть властивості вкладених обʼєктів.
 
-  public display(): string {
-    return `${this.name}, ${this.color}`;
-  }
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: DeepReadonly<T[P]>;
+};
 
-  abstract calculateArea(): string
-
-}
-
-class Circle extends Shape {
-  
-  private radius: number;
-
-  constructor(color: string, radius: number) {
-    super(color, 'Circle');
-    this.radius = radius;
-  }
-
-  calculateArea(): string {
-    return (Math.PI * this.radius ** 2).toFixed(2);
+interface IAnimalEntity {
+  name: string;
+  age: number;
+  bla: {
+    bla1: string
   }
 }
 
-class Rectangle extends Shape {
-  
-  private width: number;
-  private height: number;
+let json = '{"name": "animal", "age": 0}';
 
-  constructor(color: string, width: number, height: number) {
-    super(color, 'Rectangle');
-    this.width = width;
-    this.height = height;
-  }
+let animal: DeepReadonly<IAnimalEntity> = JSON.parse(json);
 
-  calculateArea(): string {
-    return (this.width * this.height).toFixed(2);
-  }
+animal.age = 12 
+animal.bla.bla1 = 'name'
 
-  print(): void {
-    console.log('Rectangle formula for calculating area: width * height');
-  }
-}
+//Вам потрібно створити тип DeepRequireReadonly який буде робити доступними тільки для читання навіть властивості вкладених обʼєктів та ще й робити їх обовʼязковими.
 
-class Square extends Shape {
+type DeepRequireReadonly<T> = {
+  readonly [P in keyof T]-?: DeepRequireReadonly<T[P]>;
+};
 
-  private side: number;
-
-  constructor(color: string, side: number) {
-    super(color, 'Square');
-    this.side = side;
-  }
-
-  calculateArea(): string {
-    return (this.side * this.side).toFixed(2);
-  }
-
-  print(): void {
-    console.log('Square formula for calculating area: side * side');
+interface IAnimalEntity2 {
+  name: string;
+  age: number;
+  region: {
+    city: string
   }
 }
 
-class Triangle extends Shape {
-  
-  private base: number;
-  private height: number;
+let json2 = '{"name": "animal", "age": 0, "region": {"city": "kyiv"}}';
 
-  constructor(color: string, base: number, height: number) {
-    super(color, 'Triangle');
-    this.base = base;
-    this.height = height;
-  }
+let animal2: DeepRequireReadonly<IAnimalEntity2> = JSON.parse(json2);
 
-  calculateArea(): string {
-    return (0.5 * this.base * this.height).toFixed(2);
-  }
+animal2.age = 12
+animal2.region = {}  
+
+// Вам потрібно сворити тип UpperCaseKeys, який буде приводити всі ключи до верхнього регістру.
+
+type UpperCaseKeys<T> = {
+  [P in keyof T as Uppercase<string & P>]: T[P];
+};
+
+interface Test {
+  name: string;
+  age: number;
 }
 
-let circle: Shape = new Circle('Red', 5);
-console.log(circle.display());
-console.log('Area: ' + circle.calculateArea());
-console.log('---------------------------');
+const test: UpperCaseKeys<Test> = {
+  NAME: "Nazar",
+  age: 12
+};
 
 
-let rectangle = new Rectangle('Blue', 4, 6);
-console.log(rectangle.display());
-console.log('Area: ' + rectangle.calculateArea());
-rectangle.print();
-console.log('---------------------------');
 
-let square = new Square('Green', 4);
-console.log(square.display());
-console.log('Area: ' + square.calculateArea());
-square.print();
-console.log('---------------------------');
-
-let triangle: Shape = new Triangle('Gray', 4, 6);
-console.log(triangle.display());
-console.log('Area :' + triangle.calculateArea());
-console.log('---------------------------');
