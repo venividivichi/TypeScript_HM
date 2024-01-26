@@ -1,61 +1,24 @@
 
-//Вам потрібно створити тип DeepReadonly який буде робити доступними тільки для читання навіть властивості вкладених обʼєктів.
+// Вам потрібно створити умовний тип, що служить для встановлення типу, що повертається з функції. 
+// Як параметр типу повинен обов'язково виступати функціональний тип.
 
-type DeepReadonly<T> = {
-  readonly [P in keyof T]: DeepReadonly<T[P]>;
-};
+type ReturnFunctionType<T> = T extends () => infer returnType ? returnType : undefined;
 
-interface IAnimalEntity {
-  name: string;
-  age: number;
-  bla: {
-    bla1: string
+function testFunction(): string {
+  return 'bla';
+}
+
+type TestReturnType = ReturnFunctionType<typeof testFunction>;
+
+
+// Вам потрібно створити умовний тип, який приймає функціональний тип з одним параметром (або задовільним) 
+// та повертає кортеж, де перше значення - це тип, що функція повертає, а другий - тип її параметру
+
+type ReturnFunctionInfo<T> = T extends (param: infer paramType) => infer returnType ? [returnType, paramType] : undefined;
+
+
+  function testFunc(param: number): string {
+    return 'bla'; 
   }
-}
-
-let json = '{"name": "animal", "age": 0}';
-
-let animal: DeepReadonly<IAnimalEntity> = JSON.parse(json);
-
-animal.age = 12 
-animal.bla.bla1 = 'name'
-
-//Вам потрібно створити тип DeepRequireReadonly який буде робити доступними тільки для читання навіть властивості вкладених обʼєктів та ще й робити їх обовʼязковими.
-
-type DeepRequireReadonly<T> = {
-  readonly [P in keyof T]-?: DeepRequireReadonly<T[P]>;
-};
-
-interface IAnimalEntity2 {
-  name: string;
-  age: number;
-  region: {
-    city: string
-  }
-}
-
-let json2 = '{"name": "animal", "age": 0, "region": {"city": "kyiv"}}';
-
-let animal2: DeepRequireReadonly<IAnimalEntity2> = JSON.parse(json2);
-
-animal2.age = 12
-animal2.region = {}  
-
-// Вам потрібно сворити тип UpperCaseKeys, який буде приводити всі ключи до верхнього регістру.
-
-type UpperCaseKeys<T> = {
-  [P in keyof T as Uppercase<string & P>]: T[P];
-};
-
-interface Test {
-  name: string;
-  age: number;
-}
-
-const test: UpperCaseKeys<Test> = {
-  NAME: "Nazar",
-  age: 12
-};
-
-
-
+  
+  type TestReturnTypee = ReturnFunctionInfo<typeof testFunc>;
