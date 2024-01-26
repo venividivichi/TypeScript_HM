@@ -45,9 +45,9 @@ console.log(stack.peek());
 //Створіть узагальнений клас Dictionary, який являє собою словник (асоціативний масив) 
 //з методами set, get і has. Обмежте ключі тільки валідними типами для об'єкта
 
-interface IPerson {
-  name: string;
-  age: number;
+interface IPerson<T0, T1> {
+  name: T0;
+  age: T1;
 }
 
 class Dictionary<T extends object> {
@@ -68,7 +68,7 @@ class Dictionary<T extends object> {
 
 }
 
-let personDictionary = new Dictionary<IPerson>();
+let personDictionary = new Dictionary<IPerson<string, number>>();
 personDictionary.set('Nazar', { name: 'Nazar', age: 31 });
 
 console.log(personDictionary.has('Nazar')); // true
