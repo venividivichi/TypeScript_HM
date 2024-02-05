@@ -1,74 +1,58 @@
 
-//Напишіть узагальнену функцію filterArray(array, condition), яка фільтрує масив елементів на основі наданої умови.
 
-function sortArray<T>(arr: T[], condition: (a: T, b: T) => number): T[] {
-  return arr.slice().sort(condition);;
+//Вам потрібно написати функцію, яка повертатиме об'єкт, де буде властивість result і це буде паліндром, 
+//і властивість steps — це число викликів до знаходження паліндрома. Для того, щоб перевірити себе 
+//використовуйте число 196. Це так зване Lychrel number — число яке немає поліндрому.
+
+function isPalindrome(num: number): boolean {
+  let strNum = num.toString();
+  return strNum === strNum.split('').reverse().join('');
 }
 
-let array = [12, 5, 3, 1, 0];
-let sortedArr = sortArray(array, (a, b) => a - b);
-console.log(sortedArr);
-
-//Створіть узагальнений клас Stack, який являє собою стек елементів з методами push, pop і peek.
-
-class Stack<T> {
+function generatePalindrome(num: number, maxSteps: number): { result: number | null; steps: number } {
   
-  private items: T[] = [];
-
-  push(item: T): void {
-    this.items.push(item);
+  let steps = 0;
+  let currentNumber = num;
+  while (!isPalindrome(currentNumber)) {
+      let reversedNumber = parseInt(currentNumber.toString().split('').reverse().join(''), 10);
+      currentNumber += reversedNumber;
+      steps++;
+      if (steps >= maxSteps) {
+          return { result: null, steps };
+      }
   }
-
-  pop(): T | undefined {
-    return this.items.pop();
-  }
-
-  peek(): T | undefined {
-    return this.items[this.items.length - 1];
-  }
+  return { result: currentNumber, steps };
 }
 
-const stack = new Stack<number>();
-
-stack.push(1);
-stack.push(2);
-stack.push(3);
-stack.push(5);
-
-console.log(stack.peek());
-
-console.log(stack.pop());
-
-console.log(stack.peek()); 
+let result = generatePalindrome(96, 100);
+console.log(result);
 
 
-//Створіть узагальнений клас Dictionary, який являє собою словник (асоціативний масив) 
-//з методами set, get і has. Обмежте ключі тільки валідними типами для об'єкта
+//Напишіть функцію, яка приймає масив унікальних елементів і генерує всі можливі перестановки цього масиву.
+//Використовуйте рекурсію для знаходження всіх перестановок. Наприклад, якщо вхідний масив [1, 2, 3], 
+//функція має повернути масив, що містить [1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [2, 3, 1], [3, 1, 2] і [3, 2, 1].
 
-interface IPerson<T0, T1> {
-  name: T0;
-  age: T1;
-}
-
-class Dictionary<T extends object> {
+function genCombination(arr: number[]): number[][] {
   
- private data: { [key: string]: T } = {}
+  let result: number[][] = [];
 
- set(key: string, value: T): void {
-  this.data[key] = value;
- }
+  function combine(start: number): void {
+      
+    if (start === arr.length - 1) {
+        result.push([...arr]);
+        return;
+    }
 
- get(key: string): T | undefined {
-  return this.data[key];
- }
+    for (let i = start; i < arr.length; i++) {
+        [arr[start], arr[i]] = [arr[i], arr[start]];
+        combine(start + 1);
+        [arr[start], arr[i]] = [arr[i], arr[start]];
+    }
+  }
 
- has(key: string): boolean {
-  return key in this.data;
- }
-
+  combine(0);
+  return result;
 }
 
-let personDictionary = new Dictionary<IPerson<string, number>>();
-personDictionary.set('Nazar', { name: 'Nazar', age: 31 });
-
-console.log(personDictionary.has('Nazar')); // true
+let testArray = [1, 2, 3];
+console.log(genCombination(testArray));
