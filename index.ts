@@ -9,10 +9,11 @@ function isPalindrome(num: number): boolean {
   return strNum === strNum.split('').reverse().join('');
 }
 
-function generatePalindrome(num: number, maxSteps: number): { result: number | null; steps: number } {
+function generatePalindrome(num: number): { result: number | null; steps: number } {
   
   let steps = 0;
   let currentNumber = num;
+  let maxSteps = 1000;
   while (!isPalindrome(currentNumber)) {
       let reversedNumber = parseInt(currentNumber.toString().split('').reverse().join(''), 10);
       currentNumber += reversedNumber;
@@ -24,7 +25,7 @@ function generatePalindrome(num: number, maxSteps: number): { result: number | n
   return { result: currentNumber, steps };
 }
 
-let result = generatePalindrome(96, 100);
+let result = generatePalindrome(96);
 console.log(result);
 
 
