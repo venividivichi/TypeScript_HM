@@ -16,78 +16,71 @@ function DeprecatedMethod(reason: string, alternativeMethod?: string): any {
     };
   }
 
-  function MinLength(minLength: number): PropertyDecorator {
-    return function(target: any, propertyKey: string | symbol) {
-      let value = target[propertyKey];
-  
-      let getter = () => value;
-      let setter = (newValue: string) => {
-        if (newValue.length < minLength) {
-          throw new Error(`Error: The length of '${String(propertyKey)}' should be at least ${minLength} characters.`);
-        }
-        value = newValue;
-      };
-  
-      Object.defineProperty(target, propertyKey, {
-        get: getter,
-        set: setter,
-        enumerable: true,
-        configurable: true,
-      });
-    };
-  }
+  function minLength(limit: number) {
+    return function (target: Object, propertyKey: string) {
+        let value: string;
+        const getter = function () {
+            return value;
+        };
+        const setter = function (newVal: string) {
+            if (newVal.length < limit) {
+                throw new Error(`Your ${propertyKey} should be bigger than ${limit} characters`)
+            } else {
+                value = newVal;
+            }
+        };
+        Object.defineProperty(target, propertyKey, {
+            get: getter,
+            set: setter
+        });
+    }
+}
 
-  function Email(): PropertyDecorator {
-    return function(target: any, propertyKey: string | symbol) {
-      let value = target[propertyKey];
-  
-      let getter = () => value;
-      let setter = (newValue: string) => {
-        let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-        if (!emailRegex.test(newValue)) {
-          throw new Error(`Error: The value of '${String(propertyKey)}' is not a valid email address.`);
-        }
-        value = newValue;
-      };
-  
-      Object.defineProperty(target, propertyKey, {
-        get: getter,
-        set: setter,
-        enumerable: true,
-        configurable: true,
-      });
-    };
-  }
+function maxLength(limit: number) {
+    return function (target: Object, propertyKey: string) {
+        let value: string;
+        const getter = function () {
+            return value;
+        };
+        const setter = function (newVal: string) {
+            if (newVal.length > limit) {
+                throw new Error(`Your ${propertyKey} should be less than ${limit} characters`)
+            } else {
+                value = newVal;
+            }
+        };
+        Object.defineProperty(target, propertyKey, {
+            get: getter,
+            set: setter
+        });
+    }
+}
 
-  function MaxLength(maxLength: number): PropertyDecorator {
-    return function(target: any, propertyKey: string | symbol) {
-      let value = target[propertyKey];
-  
-      let getter = () => value;
-      let setter = (newValue: string) => {
-        if (newValue.length > maxLength) {
-          throw new Error(`Error: The length of "${String(propertyKey)}" cannot exceed ${maxLength} characters.`);
+function email() {
+    return function (target: Object, propertyKey: string) {
+        let value: string;
+        
+        let getter = () => value;
+        let setter = function (newValue: string) {
+            let emailRegex: RegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+            if (!emailRegex.test(newValue)) {
+                throw new Error(`Error: The value of '${String(propertyKey)}' is not a valid email address.`)
+        };
+        Object.defineProperty(target, propertyKey, {
+            get: getter,
+            set: setter
+        });
         }
-        value = newValue;
-      };
-  
-      Object.defineProperty(target, propertyKey, {
-        get: getter,
-        set: setter,
-        enumerable: true,
-        configurable: true,
-      });
-    };
-  }
-
+    }
+}
 
 class MyClass {
     
-    @MinLength(3)
-    @MaxLength(15)
+    @minLength(3)
+    @maxLength(15)
     username: string;
   
-    @Email()
+    @email()
     email: string;
 
     constructor(username: string, email: string) {
@@ -105,5 +98,5 @@ class MyClass {
     }
 }
 
-let instance = new MyClass('Nazarii', 'nazar.kishman@gmail.com');
+let instance = new MyClass('Nazarii', 'nazar@gmail');
 instance.oldMethod();
