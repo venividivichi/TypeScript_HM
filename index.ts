@@ -39,9 +39,6 @@ class TodoItem implements ITodoItem {
     }
 
     edit(name: string, content: string): void {
-        if (this.type === TodoType.ConfirmationRequired) {
-            console.log('Confirm editing!');
-        }
         
         if (!name.trim() || !content.trim()) {
             throw new Error('Content cannot be empty, type something!');
@@ -50,6 +47,7 @@ class TodoItem implements ITodoItem {
         this.name = name;
         this.content = content;
         this.lastEditDate = new Date();
+        console.log(`Item '${this.id}' has been edited.`);
     }
 }
 
@@ -118,20 +116,49 @@ class TodoList {
             }``
         });
     }
+
+    editWithConfirmation(id: string, name: string, content: string, user_confirm: boolean): void {
+        let item = this.items.find(item => item.id === id);
+        if (!item) {
+            console.log(`Note with ID ${id} not found.`);
+            return;
+        }
+        if (item.type !== TodoType.ConfirmationRequired) {
+            console.log(`Editing note with ID ${id} need confirmation and right note Type.`);
+            return
+        }
+
+        try {
+            item.edit(name, content);
+            console.log(`Note with ID ${id} was edit successful.`);
+        } catch (error) {
+            if (error instanceof Error)
+             console.error(`Get error: ${error.message}`);
+        }
+    }
 }
 
 let todoList = new TodoList();
 
-todoList.addItem(new TodoItem('1', 'Test Todo', 'Do something important', TodoType.Default));
-todoList.addItem(new TodoItem('2', 'Read a book', 'Read Clean Code by Robert C. Martin', TodoType.Default));
-todoList.addItem(new TodoItem('3', 'Book reading', 'Read Clean Code by Robert C. Martin', TodoType.Default));
+todoList.addItem(new TodoItem('1', 'Сніданок', 'Зробити бутіки та чайок', TodoType.Default));
+todoList.addItem(new TodoItem('2', 'Погуляти собакена', 'Минути всіх собак та всі калюжі', TodoType.Default));
+todoList.addItem(new TodoItem('3', 'Приїхати на роботку', 'Послухати файну музику, незабувати оглядатись навколо', TodoType.ConfirmationRequired));
 console.log(todoList.getAllItems());
-
-let searchResults = todoList.searchItems('clean');
+console.log('---------------------------------');
+let searchResults = todoList.searchItems('собакен');
 console.log(searchResults);
-
+console.log('---------------------------------');
 let sortedByStatus = todoList.sortItems('status', 'asc');
 console.log(sortedByStatus);
-
+console.log('---------------------------------');
 let sortedByCreationDate = todoList.sortItems('creationDate', 'desc');
 console.log(sortedByCreationDate);
+console.log('---------------------------------');
+todoList.markCompleted('3');
+console.log(todoList.getItem('3'));
+console.log('---------------------------------');
+console.log('Before edit:', todoList.getItem('2'));
+todoList.editItem('2', 'Погуляти собакена', 'Пройтися парком, обнюхати все');
+console.log('After edit:', todoList.getItem('2'));
+console.log('---------------------------------');
+todoList.editWithConfirmation('3', 'Приїхати на роботку', 'Зайти за кавульою', true);
