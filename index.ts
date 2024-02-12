@@ -1,108 +1,137 @@
+enum TodoStatus { Pending, Completed }
+enum TodoType { Default, ConfirmationRequired }
 
-type DeprecatedMethodOptions = {
-    reason: string;
-    alternativeMethod?: string;
-  };
-  
-  function DeprecatedMethod(options: DeprecatedMethodOptions): any {
-    
-    return function(target: any, context: ClassMethodDecoratorContext) {
-  
-      if (context.kind !== 'method') throw new Error('Method-only decorator');
-      
-      console.warn(`Warning: Method is deprecated. ${options.reason}`); 
-      
-      if (options.alternativeMethod) {
-        return console.warn(`Please use this: ${options.alternativeMethod}.`);
-      }
-    
-    };  
-  
-  };
-  
-  function minLength(limit: number) {
-    
-    return function (target: Object, propertyKey: string) {
-        let value: string;
-        const getter = function () {
-            return value;
-        };
-        const setter = function (newVal: string) {
-            if (newVal.length < limit) {
-                throw new Error(`Your ${propertyKey} should be bigger than ${limit} characters`)
-            } else {
-                value = newVal;
-            }
-        };
-        Object.defineProperty(target, propertyKey, {
-            get: getter,
-            set: setter
-        });
+type SortCriteria = 'status' | 'creationDate';
+type SortOrder = 'asc' | 'desc';
+
+interface ITodoItem {
+    id: string;
+    name: string;
+    content: string;
+    creationDate: Date;
+    lastEditDate: Date;
+    status: TodoStatus;
+    type: TodoType;
+    edit(name: string, content: string): void;
+}
+
+class TodoItem implements ITodoItem {
+    id: string;
+    name: string;
+    content: string;
+    creationDate: Date;
+    lastEditDate: Date;
+    status: TodoStatus;
+    type: TodoType;
+
+    constructor(id: string, name: string, content: string, type: TodoType) {
+        if (!name.trim() || !content.trim()) {
+            throw new Error('Content cannot be empty, type something!');
+        }
+
+        this.id = id;
+        this.name = name;
+        this.content = content;
+        this.creationDate = new Date();
+        this.lastEditDate = new Date();
+        this.status = TodoStatus.Pending;
+        this.type = type;
     }
-  }
-  
-  function maxLength(limit: number) {
-    
-    return function (target: Object, propertyKey: string) {
-        let value: string;
-        const getter = function () {
-            return value;
-        };
-        const setter = function (newVal: string) {
-            if (newVal.length > limit) {
-                throw new Error(`Your ${propertyKey} should be less than ${limit} characters`)
-            } else {
-                value = newVal;
-            }
-        };
-        Object.defineProperty(target, propertyKey, {
-            get: getter,
-            set: setter
-        });
-    }
-  }
-  
-  function email() {
-    return function (target: Object, propertyKey: string) {
-        let value: string;
+
+    edit(name: string, content: string): void {
+        if (this.type === TodoType.ConfirmationRequired) {
+            console.log('Confirm editing!');
+        }
         
-        let getter = () => value;
-        let setter = function (newValue: string) {
-            let emailRegex: RegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-            if (!emailRegex.test(newValue)) {
-                throw new Error(`Error: The value of '${String(propertyKey)}' is not a valid email address.`)
-        };
-        Object.defineProperty(target, propertyKey, {
-            get: getter,
-            set: setter
-        });
+        if (!name.trim() || !content.trim()) {
+            throw new Error('Content cannot be empty, type something!');
+        }
+
+        this.name = name;
+        this.content = content;
+        this.lastEditDate = new Date();
+    }
+}
+
+class TodoList {
+    private items: ITodoItem[] = [];
+
+    addItem(item: ITodoItem): void {
+        this.items.push(item);
+    }
+
+    removeItem(id: string): void {
+        this.items = this.items.filter(item => item.id !== id);
+    }
+
+    editItem(id: string, name: string, content: string): void {
+        let item = this.items.find(item => item.id === id);
+        if (item) {
+            item.edit(name, content);
         }
     }
-  }
-  
-  class MyClass {
-    
-    //@minLength(3)
-    //@maxLength(15)
-    username: string;
-  
-    //@email()
-    email: string;
-  
-    constructor(username: string, email: string) {
-        this.username = username;
-        this.email = email;
-      }
-  
-    @DeprecatedMethod({ reason: 'This method is too old.', alternativeMethod: 'newMethod' })
-    public oldMethod(): any {
-        console.log('Old method is called.');
+
+    getItem(id: string): ITodoItem | undefined {
+        return this.items.find(item => item.id === id);
     }
-  
-    public newMethod(): any {
-        console.log('New method is called.');
+
+    getAllItems(): ITodoItem[] {
+        return this.items;
     }
-  }
-  
-  let instance = new MyClass('Nazarii', 'nazar@gmail');
-  instance.oldMethod();
+
+    markCompleted(id: string): void {
+        let item = this.items.find(item => item.id === id);
+        if (item) {
+            item.status = TodoStatus.Completed;
+        }
+    }
+
+    getItemsCount(): number {
+        return this.items.length;
+    }
+
+    getPendingItemsCount(): number {
+        return this.items.filter(item => item.status === TodoStatus.Pending).length;
+    }
+
+    searchItems(query: string): ITodoItem[] {
+        query = query.toLowerCase();
+        return this.items.filter(item => item.name.toLowerCase().includes(query) || item.content.toLowerCase().includes(query));
+    }
+
+    sortItems(criteria: SortCriteria, order: SortOrder = 'asc'): ITodoItem[] {
+        return this.items.sort((a, b) => {
+            if (criteria === 'status') {
+                if (order === 'asc') {
+                    return a.status - b.status;
+                } else {
+                    return b.status - a.status;
+                }
+            } else if (criteria === 'creationDate') {
+                if (order === 'asc') {
+                    return a.creationDate.getTime() - b.creationDate.getTime();
+                } else {
+                    return b.creationDate.getTime() - a.creationDate.getTime();
+                }
+            } else {
+                throw new Error('Bad sort condition');
+            }``
+        });
+    }
+}
+
+let todoList = new TodoList();
+
+todoList.addItem(new TodoItem('1', 'Test Todo', 'Do something important', TodoType.Default));
+todoList.addItem(new TodoItem('2', 'Read a book', 'Read Clean Code by Robert C. Martin', TodoType.Default));
+todoList.addItem(new TodoItem('3', 'Book reading', 'Read Clean Code by Robert C. Martin', TodoType.Default));
+console.log(todoList.getAllItems());
+
+let searchResults = todoList.searchItems('clean');
+console.log(searchResults);
+
+let sortedByStatus = todoList.sortItems('status', 'asc');
+console.log(sortedByStatus);
+
+let sortedByCreationDate = todoList.sortItems('creationDate', 'desc');
+console.log(sortedByCreationDate);
