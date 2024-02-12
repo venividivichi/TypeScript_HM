@@ -1,22 +1,27 @@
 
-function DeprecatedMethod(reason: string, alternativeMethod?: string): any {
-    return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+type DeprecatedMethodOptions = {
+    reason: string;
+    alternativeMethod?: string;
+  };
+  
+  function DeprecatedMethod(options: DeprecatedMethodOptions): any {
+    
+    return function(target: any, context: ClassMethodDecoratorContext) {
+  
+      if (context.kind !== 'method') throw new Error('Method-only decorator');
       
-        let originalMethod = descriptor.value;
+      console.warn(`Warning: Method is deprecated. ${options.reason}`); 
+      
+      if (options.alternativeMethod) {
+        return console.warn(`Please use this: ${options.alternativeMethod}.`);
+      }
+    
+    };  
   
-        descriptor.value = function(...args: any[]) {
-            console.warn(`Warning: Method '${String(propertyKey)}' is deprecated. ${reason}`); 
-            if (alternativeMethod) {
-                console.warn(`Please use this ${alternativeMethod}.`);
-            }
-            return originalMethod.apply(this, args);
-        };  
+  };
   
-      return descriptor
-    };
-  }
-
   function minLength(limit: number) {
+    
     return function (target: Object, propertyKey: string) {
         let value: string;
         const getter = function () {
@@ -34,9 +39,10 @@ function DeprecatedMethod(reason: string, alternativeMethod?: string): any {
             set: setter
         });
     }
-}
-
-function maxLength(limit: number) {
+  }
+  
+  function maxLength(limit: number) {
+    
     return function (target: Object, propertyKey: string) {
         let value: string;
         const getter = function () {
@@ -54,9 +60,9 @@ function maxLength(limit: number) {
             set: setter
         });
     }
-}
-
-function email() {
+  }
+  
+  function email() {
     return function (target: Object, propertyKey: string) {
         let value: string;
         
@@ -72,31 +78,31 @@ function email() {
         });
         }
     }
-}
-
-class MyClass {
+  }
+  
+  class MyClass {
     
-    @minLength(3)
-    @maxLength(15)
+    //@minLength(3)
+    //@maxLength(15)
     username: string;
   
-    @email()
+    //@email()
     email: string;
-
+  
     constructor(username: string, email: string) {
         this.username = username;
         this.email = email;
       }
-
-    @DeprecatedMethod('This method is to old.', 'newMethod')
+  
+    @DeprecatedMethod({ reason: 'This method is too old.', alternativeMethod: 'newMethod' })
     public oldMethod(): any {
         console.log('Old method is called.');
     }
-
+  
     public newMethod(): any {
         console.log('New method is called.');
     }
-}
-
-let instance = new MyClass('Nazarii', 'nazar@gmail');
-instance.oldMethod();
+  }
+  
+  let instance = new MyClass('Nazarii', 'nazar@gmail');
+  instance.oldMethod();
