@@ -1,188 +1,176 @@
 
-//Створіть інтерфейс з декількома властивостями. Відтворіть ту саму структуру завдяки Type alias.
+interface ICompany {
+  name: string;
+  departments: Department[];
+  preHiredEmployees: IPreHiredEmployee[];
 
-interface User {
-    id: number;
-    firstName: string;
-    email?: string;
+  hirePreHiredEmployee(preHiredEmployee: IPreHiredEmployee, department: Department): IEmployee;
 }
 
-type UserType = {
-    id: number;
-    firstName: string;
-    email?: string;
-};
+interface IDepatament {
+  name: string;
+  domain: string;
+  employees: IEmployee[];
+  budgetDebit: number;
+  budgetCredit: number;
 
-//Створіть інтерфейс з анотацією будь-якого функціонального виразу. Відтворіть ту саму структуру завдяки Type alias.
-
-interface toStringFunction {
-    (input: any): string;
+  calculateBalance(): number;
+  addEmployee(): void;
+  updateBudget(): void;
+  convertToEmployee(): IEmployee;
+  removeEmployee(): void;
+  isEmployee(): IEmployee;
 }
 
-type toStringFunctionType = (input: any) => string;
+interface IPreHiredEmployee {
+  firstName: string;
+  lastName: string;
+  salary: number;
+  bankAccountNumber: string;
+}
 
-//Продемонструйте у коді цей вираз: створіть псевдонім типу для примітивного значення, обʼєднання та кортежу.
+interface IEmployee {
+  firstName: string;
+  lastName: string;
+  paymentInfo: string;
+  salary: number;
+  status: 'active' | 'inactive' | 'unpaid leave';
+  department: Department;
+}
 
-type UserID = number;
+interface IAccounting {
+  balance: number;
 
-type StrOrNumb = string | number;
+  takeOnBalance(): void;
+  removeFromBalance(): void;
+  paySalaries(): void;
+}
 
-type UserTuple = [number, string];
+class Company implements ICompany {
+  public name: string;
+  public departments: Department[] = []; 
+  public preHiredEmployees: IPreHiredEmployee[] = [];
 
-//Продемонструйте цей вираз у вашому коді: 
-  // 1. Один інтерфейс розширює інший;
-
-  interface Client {
-    firstName: string;
-  }
-  
-  interface ITest extends Client {
-    userId: number;
-  }
-
-  class LastUser implements ITest {
-    firstName: string;
-    userId: number;
-  }
-
-  //2. Один інтерфейс розширює псевдонім типу
-
-  type Contact = {
-    email: string;
-  }
-  
-  interface ITest2 extends Contact {
-    customerId: number;
+  constructor(name: string) {
+    this.name = name;
   }
 
-  class LastUser1 implements ITest2 {
-    email: string;
-    customerId: number;
+  hirePreHiredEmployee(preHiredEmployee: IPreHiredEmployee, department: Department): IEmployee {
+    let employee: IEmployee = department.convertToEmployee(preHiredEmployee);
+    return employee;
+  }
+}
+
+class Department {
+  public name: string;
+  public domain: string;
+  public employees: IEmployee[] = [];
+  public budgetDebit: number = 0;
+  public budgetCredit: number = 0;
+
+  constructor(name: string, domain: string) {
+    this.name = name;
+    this.domain = domain;
   }
 
-  //3. Один псевдонім типу розширює інтерфейс
-  
-  interface Product {
-    productId: number;
-  }
-  
-  type DetailedProduct = Product & {
-    description: string;
+  calculateBalance(): number {
+    return this.budgetDebit - this.budgetCredit;
   }
 
-  class LastUser2 implements DetailedProduct {
-    productId: number;
-    description: string;
+  addEmployee(employee: IEmployee): void {
+    this.employees.push(employee);
+    this.updateBudget(employee.salary);
   }
 
-  //4. Один псевдонім типу розширює інший
-
-  type BasicAddress = {
-    street: string;
-    city: string;
-  }
-  
-  type FullAddress = BasicAddress & {
-    country: string;
-    postalCode: string;
+  updateBudget(amount: number): void {
+    this.budgetDebit += amount;
   }
 
-  class LastUser3 implements FullAddress {
-    street: string;
-    city: string;
-    country: string;
-    postalCode: string;
+  convertToEmployee(preHiredEmployee: IPreHiredEmployee): IEmployee {
+    let employee: IEmployee = {
+      firstName: preHiredEmployee.firstName,
+      lastName: preHiredEmployee.lastName,
+      paymentInfo: preHiredEmployee.bankAccountNumber,
+      salary: preHiredEmployee.salary,
+      status: 'active',
+      department: this,
+    };
+    this.addEmployee(employee);
+    return employee;
   }
 
-//Створіть класи, котрі будуть реалізовувати в одному випадку інтерфейси, а в іншому псевдонім типу. 
-//Наприкінці, спробуйте вимусити клас реалізувати  псевдонім типу, який іменує тип об’єднання.
-
-//Реалізація інтерфейсу класом
-
-interface ITest3 {
-    id: number;
-    name: string;
-  }
-  
-  class Urok implements ITest3 {
-    id: number;
-    name: string;
-
-    constructor(id: number, name: string) {
-        this.id = id;
-        this.name = name;
+  removeEmployee(employee: IEmployee): void {
+    let index = this.employees.indexOf(employee);
+    if (index !== -1) {
+      this.employees.splice(index, 1);
+      this.updateBudget(-employee.salary);
     }
   }
 
-//Реалізація псевдоніма типу класом
-
-type TMilk = {
-    productId: number;
-    dateProduction: Date;
-}
-  
-class Product2 implements TMilk {
-    productId: number;
-    dateProduction: Date;
-
-    constructor(productId: number) {
-        this.productId = productId;
-        this.dateProduction = new Date;
-    }
-}
-
-//Реалізація псевдоніма типу об’єднання класом
-
-interface IManager {
-    level: string;
+  isEmployee(entity: any): entity is IEmployee {
+    return 'paymentInfo' in entity && 'salary' in entity && 'status' in entity;
   }
+}
+
+class Accounting extends Department {
   
-type EmployeeType = ITest3 | IManager;
-  
-class Manager implements IManager {
-    id: number;
-    name: string;
-    level: string;
+  public balance: number = 0;
 
-    constructor(id: number, name: string, level: string) {
-        this.id = id;
-        this.name = name;
-        this.level = level;
+  constructor() {
+    super('Accounting', 'Finance');
+  }
+
+  takeOnBalance(entity: IEmployee | Department): void {
+    if (this.isEmployee(entity)) {
+      if (entity.status === 'active') {
+        this.balance += entity.salary;
+      }
+    } else if (entity instanceof Department) {
+      this.balance += entity.calculateBalance();
     }
+  }
+
+  removeFromBalance(amount: number): void {
+    this.balance -= amount;
+  }
+
+  paySalaries(employees: IEmployee[]): void {
+    employees.forEach((employee) => {
+      if (employee.status === 'active') {
+        this.removeFromBalance(employee.salary);
+      }
+    });
+  }
 }
 
-//На відміну від псевдоніма типу, інтерфейс можна визначати кілька разів і розглядатиметься як єдиний інтерфейс (з об’єднаними членами всіх декларацій). 
-//Продемонструйте цю властивість інтерфейсів у своєму рішенні.
+let company = new Company('Bruno Corp');
+let accounting = new Accounting();
 
-interface IPerson {
-    id: number;
-    firstName: string;
-}
+let hrDepartment = new Department('HR', 'Human Resources');
+let itDepartment = new Department('IT', 'Information Technology');
 
-interface IPerson {
-    lastName: string;
-    age: number;
-}
+company.departments.push(hrDepartment, itDepartment, accounting);
 
-interface IPerson {
-   email: string;
-   height: number;
-}
+let preHiredEmployee1: IPreHiredEmployee = { firstName: 'Nazar', lastName: 'Nazar', salary: 2000, bankAccountNumber: '123456789' };
+let preHiredEmployee2: IPreHiredEmployee = { firstName: 'Ivan', lastName: 'Ivan', salary: 3500, bankAccountNumber: '123456788' };
+let preHiredEmployee3: IPreHiredEmployee = { firstName: 'Taras', lastName: 'Taras', salary: 4500, bankAccountNumber: '123456779' };
 
-class Person implements IPerson {
-    id: number;
-    firstName: string;
-    lastName: string;
-    age: number;
-    email: string;
-    height: number;
+company.hirePreHiredEmployee(preHiredEmployee1, hrDepartment);
+company.hirePreHiredEmployee(preHiredEmployee2, itDepartment);
+company.hirePreHiredEmployee(preHiredEmployee3, itDepartment);
 
-    constructor(id: number, firstName: string, lastName: string, age: number, email: string, height: number) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-        this.email = email;
-        this.height = height;
-    }
-}
+console.log(`Greetings from "${company.name}"`);
+
+console.log(`Balance for ${hrDepartment.name} department: `, hrDepartment.calculateBalance()); 
+console.log(`Balance for ${hrDepartment.name} department: `, itDepartment.calculateBalance());
+
+accounting.takeOnBalance(hrDepartment);
+accounting.takeOnBalance(itDepartment);
+
+console.log('Take on balance summary: ', accounting.balance);
+
+let allEmployees = [...hrDepartment.employees, ...itDepartment.employees];
+accounting.paySalaries(allEmployees);
+console.log('Pay salaries done!');
+
+console.log('Balance: ', accounting.balance);
